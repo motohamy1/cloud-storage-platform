@@ -46,7 +46,7 @@ export const signUp = async ({
     const { account } = await createAdminClient();
     const { databases } = await createAdminClient();
 
-    let userId: string;
+    let userId: string | undefined;
 
     try {
       const user = await account.create(ID.unique(), email, password, fullName);
@@ -66,45 +66,46 @@ export const signUp = async ({
             sameSite: "strict",
             secure: true,
           });
-
-          return parseStringify({ user: { email }, alreadyExisted: true });
         } catch {
           throw new Error(
             "An account with this email already exists. Please sign in with your existing password.",
           );
         }
+      } else {
+        throw error;
       }
-      throw error;
     }
 
-    const session = await account.createEmailPasswordSession(email, password);
+    if (userId) {
+      const session = await account.createEmailPasswordSession(email, password);
 
-    (await cookies()).set("appwrite-session", session.secret, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
+      (await cookies()).set("appwrite-session", session.secret, {
+        path: "/",
+        httpOnly: true,
+        sameSite: "strict",
+        secure: true,
+      });
 
-    const existingUser = await getUserByEmail(email);
-    if (!existingUser) {
-      await databases.createDocument(
-        appwriteConfig.database,
-        appwriteConfig.usersCollection,
-        ID.unique(),
-        {
-          fullName,
-          email,
-          avatar: avatarPlaceholderUrl,
-          accountId: userId,
-        },
-      );
+      const existingUser = await getUserByEmail(email);
+      if (!existingUser) {
+        await databases.createDocument(
+          appwriteConfig.database,
+          appwriteConfig.usersCollection,
+          ID.unique(),
+          {
+            fullName,
+            email,
+            avatar: avatarPlaceholderUrl,
+            accountId: userId,
+          },
+        );
+      }
     }
-
-    return parseStringify({ user: { id: userId, email, fullName } });
   } catch (error) {
     handleError(error, "Failed to sign up");
   }
+
+  redirect("/");
 };
 
 export const signIn = async ({
@@ -125,8 +126,6 @@ export const signIn = async ({
       sameSite: "strict",
       secure: true,
     });
-
-    return parseStringify({ sessionId: session.$id });
   } catch (error: unknown) {
     const errorObj = error as { type?: string; code?: number };
     if (
@@ -139,6 +138,8 @@ export const signIn = async ({
     }
     handleError(error, "Failed to sign in");
   }
+
+  redirect("/");
 };
 
 export const getCurrentUser = async () => {

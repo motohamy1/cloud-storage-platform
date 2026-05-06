@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +33,6 @@ const authFormSchema = (formType: FormType) => {
 };
 
 const AuthForm = ({ type }: { type: FormType }) => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -54,24 +52,16 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
     try {
       if (type === "sign-in") {
-        const result = await signIn({
+        await signIn({
           email: values.email,
           password: values.password,
         });
-
-        if (result?.sessionId) {
-          router.push("/");
-        }
       } else {
-        const result = await signUp({
+        await signUp({
           fullName: values.fullName || "",
           email: values.email,
           password: values.password,
         });
-
-        if (result?.user) {
-          router.push("/");
-        }
       }
     } catch (error) {
       console.error("Auth error:", error);
