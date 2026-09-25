@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Search from "@/components/Search";
 import FileUploader from "@/components/FileUploader";
+import ThemeToggle from "@/components/ThemeToggle";
 import { signOutUser } from "@/lib/actions/user.actions";
 
 const Header = ({
@@ -16,9 +17,10 @@ const Header = ({
 }) => {
   return (
     <header className="header">
-      <Search />
+      <Search accountId={accountId} />
       <div className="header-wrapper">
         <FileUploader ownerId={userId} accountId={accountId} />
+        <ThemeToggle />
         <form
           action={async () => {
             await signOutUser();

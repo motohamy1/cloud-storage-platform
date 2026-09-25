@@ -2,6 +2,53 @@
 
 declare type FileType = "document" | "image" | "video" | "audio" | "other";
 
+declare interface SharedUser {
+  $id: string;
+  accountId?: string;
+  email: string;
+  fullName?: string;
+}
+
+declare interface UserRecord {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  accountId: string;
+  fullName: string;
+  email: string;
+  avatar: string;
+  emailVerified?: boolean;
+}
+
+declare interface FileRecord {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  type: FileType;
+  name: string;
+  url: string;
+  extension: string;
+  size: number;
+  owner: string;
+  accountId: string;
+  bucketField: string;
+  users: SharedUser[];
+  folderId?: string;
+  inTrash?: boolean;
+  deletedAt?: string;
+  favorite?: boolean;
+  shareId?: string;
+  sharePermission?: "view" | "edit";
+  shareExpiry?: string;
+  previousVersions?: FileVersion[];
+}
+
+declare interface FileVersion {
+  bucketField: string;
+  size: number;
+  $createdAt: string;
+}
+
 declare interface ActionType {
   label: string;
   icon: string;
@@ -18,12 +65,23 @@ declare interface UploadFileProps {
   ownerId: string;
   accountId: string;
   path: string;
+  folderId?: string;
 }
 declare interface GetFilesProps {
   types: string[];
   searchText?: string;
   sort?: string;
   limit?: number;
+  folderId?: string;
+  includeTrashed?: boolean;
+}
+declare interface Folder {
+  $id: string;
+  name: string;
+  parentId: string;
+  accountId: string;
+  $createdAt: string;
+  $updatedAt: string;
 }
 declare interface RenameFileProps {
   fileId: string;
@@ -70,7 +128,7 @@ declare interface ThumbnailProps {
 }
 
 declare interface ShareInputProps {
-  file: Models.Document;
+  file: FileRecord;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: (email: string) => void;
 }

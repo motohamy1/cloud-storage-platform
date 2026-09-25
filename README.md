@@ -9,7 +9,7 @@
      <img src="https://img.shields.io/badge/-Next_JS-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=000000" alt="nextdotjs" />
     <img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
     <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
-    <img src="https://img.shields.io/badge/-Appwrite-black?style=for-the-badge&logoColor=white&logo=appwrite&color=FD366E" alt="appwrite" />
+    <img src="https://img.shields.io/badge/-Firebase-black?style=for-the-badge&logoColor=white&logo=firebase&color=FFCA28" alt="Firebase" />
   </div>
 
 <h3 align="center">Storage and File Sharing Platform</h3>
@@ -20,7 +20,7 @@
 
 ## <a name="introduction">🤖 Introduction</a>
 
-A storage management and file sharing platform that lets users effortlessly upload, organize, and share files. Built with the latest Next.js 15 and the Appwrite Node SDK, utilizing advanced features for seamless file management.
+A storage management and file sharing platform that lets users effortlessly upload, organize, and share files. Built with Next.js 15 and Firebase Authentication, Cloud Firestore, and Cloud Storage.
 
 If you're getting started and need assistance or face any bugs, join our active Discord community with over **34k+**
 members. It's a place where people help each other out.
@@ -30,18 +30,20 @@ members. It's a place where people help each other out.
 
 - React 19
 - Next.js 15
-- Appwrite
+- Firebase Authentication
+- Cloud Firestore
+- Cloud Storage
 - TailwindCSS
 - ShadCN
 - TypeScript
 
 ## <a name="features">🔋 Features</a>
 
-👉 **User Authentication with Appwrite**: Implement signup, login, and logout functionality using Appwrite's authentication system.
+👉 **User Authentication with Firebase**: Implement signup, login, and logout functionality using Firebase Authentication session cookies.
 
 👉 **FIle Uploads**: Effortlessly upload a variety of file types, including documents, images, videos, and audio, ensuring all your important data.
 
-👉 **View and Manage Files**: Users can browse through their uploaded files stored in Appwrite storage, view on a new tab, rename file or delete.
+👉 **View and Manage Files**: Users can browse through files stored in Cloud Storage, view them securely, rename them, or delete them.
 
 👉 **Download Files**: Users can download their uploaded files giving them instant access to essential documents.
 
@@ -55,7 +57,7 @@ members. It's a place where people help each other out.
 
 👉 **Modern Responsive Design**: A fresh and minimalist UI that emphasizes usability, ensuring a clean aesthetic across all devices.
 
-and many more, including the latest **React 19**, **Next.js 15** and **Appwrite** features alongside code architecture and
+and many more, including the latest **React 19**, **Next.js 15**, and **Firebase** services alongside code architecture and
 reusability
 
 ## <a name="quick-start">🤸 Quick Start</a>
@@ -83,20 +85,27 @@ npm install
 
 **Set Up Environment Variables**
 
-Create a new file named `.env.local` in the root of your project and add the following content:
+Create a new file named `.env` or `.env.local` in the root of your project and add the following content:
 
 ```env
-NEXT_PUBLIC_APPWRITE_ENDPOINT="https://cloud.appwrite.io/v1"
-NEXT_PUBLIC_APPWRITE_PROJECT=""
-NEXT_PUBLIC_APPWRITE_DATABASE=""
-NEXT_PUBLIC_APPWRITE_USERS_COLLECTION=""
-NEXT_PUBLIC_APPWRITE_FILES_COLLECTION=""
-NEXT_PUBLIC_APPWRITE_BUCKET=""
-NEXT_APPWRITE_KEY=""
+FIREBASE_PROJECT_ID="cloud-store-platform"
+FIREBASE_STORAGE_BUCKET="cloud-store-platform.firebasestorage.app"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="cloud-store-platform"
+NEXT_PUBLIC_FIREBASE_API_KEY="your-web-api-key"
+GOOGLE_APPLICATION_CREDENTIALS="./secrets/firebase-service-account.json"
 ```
 
-Replace the values with your actual Appwrite credentials. You can obtain these credentials by signing up &
-creating a new project on the [Appwrite website](https://appwrite.io/).
+Create a Firebase project, enable Email/Password Authentication, create a Firestore database, and create a Cloud Storage bucket. Download a Firebase service-account JSON, place it at `./secrets/firebase-service-account.json`, and keep that directory ignored by Git. The service account must not be exposed to the browser. `NEXT_PUBLIC_FIREBASE_API_KEY` is the Firebase Web API key used by the server to exchange email/password credentials for a Firebase session.
+
+**Migrating Existing Appwrite Data**
+
+The migration command copies Appwrite user profiles, folders, file metadata, and stored objects to Firebase. Appwrite password hashes are not exported, so existing users must register again in Firebase.
+
+```bash
+npm run migrate:appwrite
+```
+
+Use `node --env-file=.env scripts/migrate-from-appwrite.mjs --dry-run` first to inspect counts without writing to Firebase. The command writes `firebase-migration-report.json` after a successful run. Keep the Appwrite project and local exports until the Firebase deployment has been verified.
 
 **Running the Project**
 

@@ -24,9 +24,34 @@ export const navItems = [
     icon: "/assets/icons/others.svg",
     url: "/others",
   },
+  {
+    name: "Folders",
+    icon: "/assets/icons/folder.svg",
+    url: "/folders",
+  },
+  {
+    name: "Starred",
+    icon: "/assets/icons/star.svg",
+    url: "/starred",
+  },
+  {
+    name: "AI Search",
+    icon: "/assets/icons/search.svg",
+    url: "/ai-search",
+  },
+  {
+    name: "Trash",
+    icon: "/assets/icons/trash.svg",
+    url: "/trash",
+  },
 ];
 
 export const actionsDropdownItems = [
+  {
+    label: "Preview",
+    icon: "/assets/icons/eye.svg",
+    value: "preview",
+  },
   {
     label: "Rename",
     icon: "/assets/icons/edit.svg",
@@ -41,6 +66,11 @@ export const actionsDropdownItems = [
     label: "Share",
     icon: "/assets/icons/share.svg",
     value: "share",
+  },
+  {
+    label: "Move to",
+    icon: "/assets/icons/folder-light.svg",
+    value: "move",
   },
   {
     label: "Download",
@@ -84,4 +114,6 @@ export const sortTypes = [
 export const avatarPlaceholderUrl =
   "https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg";
 
-export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+export const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
+
+export const STORAGE_QUOTA_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
