@@ -2,6 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: 0 0% 100%;
+  --foreground: 215 25% 27%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 25% 27%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 25% 27%;
+  --primary: 0 100% 27%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 20% 96%;
+  --secondary-foreground: 215 25% 27%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 213 18% 68%;
+  --accent: 210 20% 96%;
+  --accent-foreground: 215 25% 27%;
+  --destructive: 0 100% 36%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 25% 95%;
+  --input: 210 20% 90%;
+  --ring: 0 100% 27%;
+  --radius: 0.65rem;
+  --chart-1: 0 100% 27%;
+  --chart-2: 213 100% 65%;
+  --chart-3: 161 66% 52%;
+  --chart-4: 285 92% 79%;
+  --chart-5: 24 89% 70%;
+}
+
+.dark {
+  --background: 225 33% 5%;
+  --foreground: 210 20% 96%;
+  --card: 228 31% 9%;
+  --card-foreground: 210 20% 96%;
+  --popover: 228 31% 9%;
+  --popover-foreground: 210 20% 96%;
+  --primary: 0 100% 71%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 228 20% 14%;
+  --secondary-foreground: 210 20% 96%;
+  --muted: 228 20% 14%;
+  --muted-foreground: 213 18% 68%;
+  --accent: 228 20% 14%;
+  --accent-foreground: 210 20% 96%;
+  --destructive: 0 100% 71%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 228 20% 16%;
+  --input: 228 20% 18%;
+  --ring: 0 100% 71%;
+  --chart-1: 0 100% 71%;
+  --chart-2: 213 100% 65%;
+  --chart-3: 161 66% 52%;
+  --chart-4: 285 92% 79%;
+  --chart-5: 24 89% 70%;
+}
+
 @layer base {
   * {
     @apply scroll-smooth;
@@ -109,7 +164,7 @@
   }
 
   .shad-form-item {
-    @apply flex h-[78px] flex-col justify-center rounded-xl border border-light-300 px-4 shadow-drop-1 bg-white;
+    @apply flex h-[78px] flex-col justify-center rounded-xl border border-light-300 px-4 shadow-drop-1 bg-background;
   }
   .shad-form-label {
     @apply text-light-100 pt-2 body-2 w-full !important;
@@ -118,7 +173,7 @@
     @apply text-red body-2 ml-4 !important;
   }
   .shad-alert-dialog {
-    @apply space-y-4 max-w-[95%] sm:w-fit rounded-xl md:rounded-[30px] px-4 md:px-8 py-10 bg-white outline-none !important;
+    @apply space-y-4 max-w-[95%] sm:w-fit rounded-xl md:rounded-[30px] px-4 md:px-8 py-10 bg-background outline-none !important;
   }
   .shad-submit-btn {
     @apply bg-brand button hover:bg-brand-100 transition-all rounded-full !important;
@@ -141,7 +196,7 @@
     @apply cursor-pointer !important;
   }
   .shad-dialog {
-    @apply rounded-[26px] w-[90%] max-w-[400px] px-6 py-8 bg-white !important;
+    @apply rounded-[26px] w-[90%] max-w-[400px] px-6 py-8 bg-background !important;
   }
   .shad-chart-title {
     @apply text-white !important;
@@ -173,19 +228,16 @@
     @apply mt-6 grid grid-cols-1 gap-4 xl:mt-10 xl:grid-cols-2 xl:gap-9 !important;
   }
   .dashboard-summary-card {
-    @apply relative mt-6 rounded-[20px] bg-white p-5 transition-all hover:scale-105 !important;
-  }
-  .summary-type-icon {
-    @apply absolute -left-3 top-[-25px] z-10 w-[190px] object-contain !important;
+    @apply relative flex min-h-[150px] flex-col rounded-[20px] border border-light-300 bg-background p-5 transition-colors hover:bg-light-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 !important;
   }
   .summary-type-size {
-    @apply h4 relative z-20 w-full text-right text-light-100 !important;
+    @apply h4 w-full text-right text-light-100 !important;
   }
   .summary-type-title {
-    @apply h5 relative z-20 text-center text-light-100 !important;
+    @apply h5 text-left text-light-100 !important;
   }
   .dashboard-recent-files {
-    @apply h-full rounded-[20px] xl:h-[654px] custom-scrollbar overflow-auto bg-white p-5 xl:p-7 !important;
+    @apply h-full rounded-[20px] xl:h-[654px] custom-scrollbar overflow-auto bg-background p-5 xl:p-7 !important;
   }
   .recent-file-details {
     @apply flex w-full justify-between items-center !important;
@@ -228,7 +280,7 @@
     @apply font-medium text-brand-100 !important;
   }
   .modal-cancel-button {
-    @apply h-[52px] flex-1 rounded-full bg-white text-light-100 hover:bg-transparent !important;
+    @apply h-[52px] flex-1 rounded-full bg-background text-light-100 hover:bg-transparent !important;
   }
   .modal-submit-button {
     @apply primary-btn !mx-0 h-[52px] w-full flex-1 !important;
@@ -274,7 +326,7 @@
 
   /* Card */
   .file-card {
-    @apply flex cursor-pointer flex-col gap-6 rounded-[18px] bg-white p-5 shadow-sm transition-all hover:shadow-drop-3 !important;
+    @apply flex cursor-pointer flex-col gap-6 rounded-[18px] bg-background p-5 shadow-sm transition-all hover:shadow-drop-3 !important;
   }
   .file-card-details {
     @apply flex flex-col gap-2 text-light-100 !important;
@@ -308,10 +360,10 @@
     @apply primary-btn h-[52px] gap-2 px-10 shadow-drop-1 !important;
   }
   .uploader-preview-list {
-    @apply fixed bottom-10 right-10 z-50 flex size-full h-fit max-w-[480px] flex-col gap-3 rounded-[20px] bg-white p-7 shadow-drop-3 !important;
+    @apply fixed bottom-10 right-10 z-50 flex size-full h-fit max-w-[480px] flex-col gap-3 rounded-[20px] bg-background p-7 shadow-drop-3 !important;
   }
   .uploader-preview-item {
-    @apply flex items-center justify-between gap-3 rounded-xl p-3 shadow-drop-3 bg-white !important;
+    @apply flex items-center justify-between gap-3 rounded-xl p-3 shadow-drop-3 bg-background !important;
   }
   .preview-item-name {
     @apply subtitle-2 mb-2 line-clamp-1 max-w-[300px] !important;
@@ -365,13 +417,13 @@
     @apply relative w-full md:max-w-[480px] !important;
   }
   .search-input-wrapper {
-    @apply flex h-[52px] flex-1 items-center gap-3 rounded-full px-4 shadow-drop-3 bg-white !important;
+    @apply flex h-[52px] flex-1 items-center gap-3 rounded-full px-4 shadow-drop-3 bg-background !important;
   }
   .search-input {
     @apply body-2 shad-no-focus placeholder:body-1 w-full border-none p-0 shadow-none placeholder:text-light-200 !important;
   }
   .search-result {
-    @apply absolute left-0 top-16 z-50 flex w-full flex-col gap-3 rounded-[20px] bg-white p-4 !important;
+    @apply absolute left-0 top-16 z-50 flex w-full flex-col gap-3 rounded-[20px] bg-background p-4 !important;
   }
   .empty-result {
     @apply body-2 text-center text-light-100 !important;
@@ -379,7 +431,7 @@
 
   /* Sidebar */
   .sidebar {
-    @apply remove-scrollbar hidden h-screen w-[90px] flex-col overflow-auto px-5 py-7 sm:flex lg:w-[280px] xl:w-[325px] bg-white !important;
+    @apply remove-scrollbar hidden h-screen w-[90px] flex-col overflow-auto px-5 py-7 sm:flex lg:w-[280px] xl:w-[325px] bg-background !important;
   }
   .sidebar-nav {
     @apply h5 mt-9 flex-1 gap-1 text-brand !important;
@@ -400,7 +452,7 @@
 
   /* Sort */
   .sort-select {
-    @apply shad-no-focus h-11 w-full rounded-[8px] border-transparent bg-white !shadow-sm sm:w-[210px] !important;
+    @apply shad-no-focus h-11 w-full rounded-[8px] border-transparent bg-background !shadow-sm sm:w-[210px] !important;
   }
   .sort-select-content {
     @apply !shadow-drop-3 !important;

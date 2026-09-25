@@ -151,6 +151,14 @@ const AuthForm = ({ type }: { type: FormType }) => {
             )}
           />
 
+          {type === "sign-in" && (
+            <div className="body-2 flex justify-end">
+              <Link href="/reset-password" className="font-medium text-brand">
+                Forgot password?
+              </Link>
+            </div>
+          )}
+
           <Button
             type="submit"
             className="form-submit-button"

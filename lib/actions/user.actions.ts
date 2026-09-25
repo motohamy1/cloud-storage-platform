@@ -1,35 +1,22 @@
 "use server";
 
-import { createAdminClient, createSessionClient } from "@/lib/appwrite";
-import { appwriteConfig } from "@/lib/appwrite/config";
-import { Query, ID } from "node-appwrite";
-import { parseStringify } from "@/lib/utils";
-import { cookies } from "next/headers";
-import { avatarPlaceholderUrl } from "@/constants";
 import { redirect } from "next/navigation";
+import { getFirebaseAdmin } from "@/lib/firebase";
+import {
+  clearSessionCookie,
+  createUserProfile,
+  getSessionUser,
+  getUserByEmail,
+  getUserIdToken,
+  setSessionCookie,
+} from "@/lib/firebase/auth";
+import { avatarPlaceholderUrl } from "@/constants";
+import { sendVerificationEmail } from "@/lib/resend";
 
-const getUserByEmail = async (email: string) => {
-  const { databases } = await createAdminClient();
-
-  try {
-    const result = await databases.listDocuments(
-      appwriteConfig.database,
-      appwriteConfig.usersCollection,
-      [Query.equal("email", [email])],
-    );
-
-    return result.total > 0 ? result.documents[0] : null;
-  } catch (error) {
-    console.error("Database query error:", error);
-    throw error;
-  }
-};
+export { getUserByEmail };
 
 const handleError = (error: unknown, message: string) => {
   console.error(message, error);
-  if (error instanceof Error) {
-    throw new Error(`${message}: ${error.message}`);
-  }
   throw new Error(message);
 };
 
@@ -42,66 +29,45 @@ export const signUp = async ({
   email: string;
   password: string;
 }) => {
-  try {
-    const { account } = await createAdminClient();
-    const { databases } = await createAdminClient();
+  const { auth } = getFirebaseAdmin();
+  const normalizedEmail = email.trim().toLowerCase();
+  let uid: string | undefined;
 
-    let userId: string | undefined;
+  try {
+    const user = await auth.createUser({
+      email: normalizedEmail,
+      password,
+      displayName: fullName.trim(),
+    });
+    uid = user.uid;
 
     try {
-      const user = await account.create(ID.unique(), email, password, fullName);
-      userId = user.$id;
-    } catch (error: unknown) {
-      const errorObj = error as { type?: string; message?: string };
-      if (errorObj?.type === "user_already_exists") {
-        try {
-          const session = await account.createEmailPasswordSession(
-            email,
-            password,
-          );
-
-          (await cookies()).set("appwrite-session", session.secret, {
-            path: "/",
-            httpOnly: true,
-            sameSite: "strict",
-            secure: true,
-          });
-        } catch {
-          throw new Error(
-            "An account with this email already exists. Please sign in with your existing password.",
-          );
-        }
-      } else {
-        throw error;
-      }
-    }
-
-    if (userId) {
-      const session = await account.createEmailPasswordSession(email, password);
-
-      (await cookies()).set("appwrite-session", session.secret, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "strict",
-        secure: true,
+      await createUserProfile({
+        uid,
+        fullName: fullName.trim(),
+        email: normalizedEmail,
+        avatar: avatarPlaceholderUrl,
       });
+    } catch (error) {
+      await auth.deleteUser(uid);
+      throw error;
+    }
 
-      const existingUser = await getUserByEmail(email);
-      if (!existingUser) {
-        await databases.createDocument(
-          appwriteConfig.database,
-          appwriteConfig.usersCollection,
-          ID.unique(),
-          {
-            fullName,
-            email,
-            avatar: avatarPlaceholderUrl,
-            accountId: userId,
-          },
-        );
+    const idToken = await getUserIdToken(normalizedEmail, password);
+    await setSessionCookie(idToken);
+
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await sendVerificationEmail(normalizedEmail);
+      } catch (error) {
+        console.error("Failed to send verification email:", error);
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string };
+    if (firebaseError.code === "auth/email-already-exists") {
+      throw new Error("An account with this email already exists. Please sign in.");
+    }
     handleError(error, "Failed to sign up");
   }
 
@@ -116,62 +82,82 @@ export const signIn = async ({
   password: string;
 }) => {
   try {
-    const { account } = await createAdminClient();
-
-    const session = await account.createEmailPasswordSession(email, password);
-
-    (await cookies()).set("appwrite-session", session.secret, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
-  } catch (error: unknown) {
-    const errorObj = error as { type?: string; code?: number };
-    if (
-      errorObj?.type === "user_invalid_credentials" ||
-      errorObj?.code === 401
-    ) {
-      throw new Error(
-        "Invalid email or password. Please check your credentials.",
-      );
-    }
-    handleError(error, "Failed to sign in");
+    const idToken = await getUserIdToken(email, password);
+    await setSessionCookie(idToken);
+  } catch (error) {
+    handleError(error, "Invalid email or password. Please check your credentials.");
   }
 
   redirect("/");
 };
 
+export const sendPasswordResetEmail = async (email: string) => {
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  if (!apiKey) {
+    throw new Error("NEXT_PUBLIC_FIREBASE_API_KEY is not configured");
+  }
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requestType: "PASSWORD_RESET",
+        email: email.trim().toLowerCase(),
+        returnOobInfo: true,
+      }),
+      cache: "no-store",
+    },
+  );
+
+  const payload = (await response.json()) as {
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    const message = payload.error?.message ?? "";
+
+    // Treat unknown emails as success to avoid leaking account existence
+    if (message === "EMAIL_NOT_FOUND") {
+      return { status: "success" };
+    }
+    if (message === "INVALID_EMAIL") {
+      throw new Error("Please enter a valid email address.");
+    }
+    throw new Error("Unable to send reset email. Please try again later.");
+  }
+
+  return { status: "success" };
+};
+
+export const resendVerificationEmail = async () => {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new Error("You must be signed in");
+
+  try {
+    await sendVerificationEmail(currentUser.email);
+    return { status: "sent" };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("RESEND_API_KEY")) {
+      throw new Error(
+        "Email sending is not configured yet. Add RESEND_API_KEY to enable verification emails.",
+      );
+    }
+    throw error;
+  }
+};
+
 export const getCurrentUser = async () => {
   try {
-    const { account } = await createSessionClient();
-    const { databases } = await createAdminClient();
-
-    const result = await account.get();
-
-    const user = await databases.listDocuments(
-      appwriteConfig.database,
-      appwriteConfig.usersCollection,
-      [Query.equal("accountId", result.$id)],
-    );
-
-    if (user.total <= 0) return null;
-
-    return parseStringify(user.documents[0]);
+    return await getSessionUser();
   } catch (error) {
+    console.error("Failed to resolve current user:", error);
     return null;
   }
 };
 
 export const signOutUser = async () => {
-  const { account } = await createSessionClient();
-
-  try {
-    await account.deleteSession("current");
-    (await cookies()).delete("appwrite-session");
-  } catch (error) {
-    handleError(error, "Failed to sign out user");
-  } finally {
-    redirect("/sign-in");
-  }
+  await clearSessionCookie();
+  redirect("/sign-in");
 };

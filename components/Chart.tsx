@@ -24,12 +24,14 @@ const chartConfig = {
   },
   used: {
     label: "Used",
-    color: "white",
+    color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
 export const Chart = ({ used = 0 }: { used: number }) => {
-  const chartData = [{ storage: "used", 10: used, fill: "white" }];
+  const chartData = [
+    { storage: "used", 10: used, fill: "var(--color-used)" },
+  ];
 
   return (
     <Card className="chart">
